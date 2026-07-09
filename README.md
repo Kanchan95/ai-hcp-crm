@@ -74,6 +74,8 @@ sequenceDiagram
 | LLM | Groq — llama-3.1-8b-instant | Fast inference, tool-calling support |
 | Database | PostgreSQL + SQLAlchemy 2 | JSONB columns for list fields |
 | Package Manager | uv | Reproducible lockfile, 10× faster than pip |
+| Containerisation | Docker + Docker Compose | One-command setup — postgres + backend + frontend |
+| Reverse Proxy | nginx (Alpine) | Serves built React app, proxies `/api` to FastAPI |
 
 ---
 
