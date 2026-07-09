@@ -8,15 +8,41 @@
 
 ---
 
-## Screenshots
+## Live Demo Screenshots
 
-**Empty screen — form and chat ready**
+### Empty screen — form and chat ready to use
 
 ![Empty form](screenshots/01_empty_form.png)
 
-**After logging — AI fills every field from the chat entry**
+---
+
+### After logging — AI fills every field from the chat entry
 
 ![Form filled by AI](screenshots/02_form_filled.png)
+
+---
+
+### Tool 3 — AI suggests HCP-specific follow-up actions
+
+![Follow-ups suggested](screenshots/03_follow_ups.png)
+
+---
+
+### Tool 4 — Compliance check against PhRMA / PDMA / Sunshine Act
+
+![Compliance check](screenshots/04_compliance.png)
+
+---
+
+### Tool 5 — Clinical materials recommended for the next visit
+
+![Materials recommended](screenshots/05_materials.png)
+
+---
+
+### Scope enforcement — off-topic queries are politely rejected
+
+![Off-topic rejected](screenshots/06_offtopic_rejected.png)
 
 ---
 
@@ -47,7 +73,7 @@ sequenceDiagram
     Tool->>LLM: Extraction LLM — NLP → structured JSON
     LLM-->>Tool: { hcp_name, date, topics, sentiment, outcomes, ... }
     Tool->>DB: INSERT INTO interactions → gets id = 7
-    Tool-->>Agent: "Interaction logged (ID 7). HCP: Dr. Sharma | Sentiment: Positive ..."
+    Tool-->>Agent: "Interaction logged (ID 7). HCP: Dr. Ayesha Khan ..."
 
     Agent->>LLM: Router LLM — anything else to do?
     LLM-->>Agent: No tool calls — compose final reply
@@ -82,19 +108,21 @@ sequenceDiagram
 ## The 5 LangGraph Tools
 
 | # | Tool | What it does | Triggered when rep says |
-|---|------|-------------|-----------------|
-| 1 | `log_interaction` | Extracts all 14 form fields from the chat entry → INSERT to DB | *"Today I met Dr. Priya Sharma at Apollo…"* |
-| 2 | `edit_interaction` | Differential update — changes only the mentioned fields, keeps everything else | *"Actually the sentiment was Neutral, not Positive"* |
+|---|------|-------------|------------------------|
+| 1 | `log_interaction` | Extracts all 14 form fields from the chat entry → INSERT to DB | *"Today I met Dr. Ayesha Khan at Fortis…"* |
+| 2 | `edit_interaction` | Differential update — changes only the mentioned fields, keeps everything else | *"Actually the interaction type was a conference"* |
 | 3 | `suggest_follow_ups` | Generates 4–5 HCP-specific, time-bound follow-up actions | *"Suggest follow-ups for this visit"* |
-| 4 | `check_compliance` | Audits against PhRMA Code, PDMA sample rules, Sunshine Act | *"Is this interaction compliant?"* |
-| 5 | `recommend_materials` | Suggests clinical materials for the next visit; skips what was already shared | *"What should I bring to Dr. Sharma next time?"* |
+| 4 | `check_compliance` | Audits against PhRMA Code, PDMA sample rules, Sunshine Act | *"Check compliance for this interaction"* |
+| 5 | `recommend_materials` | Suggests clinical materials for the next visit; skips what was already shared | *"What materials should I bring for the next visit?"* |
+
+The AI also enforces **scope** — any question outside HCP interaction management is politely redirected. Greetings (hi / hello) get a single welcome line asking the rep to describe their visit.
 
 **Why LangGraph instead of a simple LLM call?**
 
 The ReAct loop means the LLM sees tool results and keeps reasoning. This enables:
-- **Chaining**: "Check compliance and suggest follow-ups" → agent calls both tools in sequence
-- **Selective use**: A general question triggers no tool — no wasted DB writes
-- **Semantic routing**: The LLM reads tool docstrings to decide — not keyword matching
+- **Chaining**: "Check compliance and suggest follow-ups" → agent calls both tools in sequence, one result informs the next
+- **Selective use**: A general question triggers no tool — no wasted DB writes or LLM calls
+- **Semantic routing**: The LLM reads tool docstrings to decide which tool to call — not keyword matching
 
 ---
 
@@ -105,6 +133,7 @@ ai-hcp-crm/
 ├── docker-compose.yml             # Run everything with one command
 ├── .env.example                   # Environment variable template
 ├── README.md
+├── screenshots/                   # Live demo screenshots
 │
 ├── backend/
 │   ├── Dockerfile
@@ -116,7 +145,7 @@ ai-hcp-crm/
 │   ├── models.py                  # Interaction + ChatMessage ORM models
 │   ├── schemas.py                 # Pydantic request/response schemas
 │   ├── agent/
-│   │   ├── graph.py               # LangGraph StateGraph (ReAct loop)
+│   │   ├── graph.py               # LangGraph StateGraph (ReAct loop + system prompt)
 │   │   └── tools.py               # 5 tools via factory pattern
 │   └── routers/
 │       └── interactions.py        # POST /api/chat endpoint
@@ -141,15 +170,6 @@ ai-hcp-crm/
 
 ---
 
-## Prerequisites
-
-| Tool | Version |
-|------|---------|
-| Docker + Docker Compose | Any recent version |
-| Groq API key | Free at [console.groq.com](https://console.groq.com) |
-
----
-
 ## Run with Docker (recommended)
 
 ```bash
@@ -162,7 +182,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open `http://localhost:3000`
+Open **http://localhost:3000**
 
 ---
 
@@ -184,7 +204,7 @@ source .venv/bin/activate
 uv pip install -e "."
 
 cp .env.example .env
-# Set GROQ_API_KEY and DATABASE_URL in .env
+# Set GROQ_API_KEY and DATABASE_URL
 
 uvicorn main:app --reload --port 8000
 ```
@@ -195,6 +215,8 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
+API docs: **http://localhost:8000/docs**
+
 ### 3. Frontend
 
 ```bash
@@ -203,7 +225,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000` · API docs at `http://localhost:8000/docs`
+Open **http://localhost:3000**
 
 ### Environment Variables (`backend/.env`)
 
@@ -222,6 +244,8 @@ AGENT_MODEL=llama-3.1-8b-instant
 **Factory pattern for tools** — `create_tools(db, state)` creates 5 tool closures per HTTP request. Each closure captures the same SQLAlchemy session and the same mutable `agent_state` dict, so `log_interaction` can write the new `interaction_id` back for the router to read after the graph finishes.
 
 **Two LLM calls per tool** — The Router LLM (agent node) only decides which tool to call. The Extraction LLM runs inside each tool with a focused NLP prompt. This keeps each call small and accurate.
+
+**AI scope enforcement** — The system prompt strictly limits the AI to HCP interaction topics only. Off-topic queries return a fixed redirect message. This prevents misuse and keeps the assistant focused.
 
 **Scroll isolation** — `html, body, #root { overflow: hidden }` locks the page. Chat scrolls via `messagesRef.scrollTop = scrollHeight`. FormPanel uses `useLayoutEffect` to restore scroll position across Redux re-renders so the form never jumps when AI populates it.
 
