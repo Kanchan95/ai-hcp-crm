@@ -51,6 +51,10 @@ coverage.xml
 HLD.md
 diagrams/generate_*.py
 
+# Docker
+.env
+*.env.local
+
 # Test artifacts
 test_e2e.js
 test_scroll_ui.js
