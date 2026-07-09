@@ -1,0 +1,68 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Lock the viewport — no page-level scroll ever */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Full-height column: title row (fixed) + panels row (fills remainder) */
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px 0;
+  overflow: hidden;
+}
+
+.page-title-row {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.new-interaction-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.new-interaction-btn:hover { background: #f9fafb; }
+
+/*
+ * The panels row fills all remaining height.
+ * overflow: hidden clips both children to this height so NEITHER
+ * panel can break out and cause the page to scroll.
+ */
+.panels-row {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  overflow: hidden;
+  padding-bottom: 24px;
+}

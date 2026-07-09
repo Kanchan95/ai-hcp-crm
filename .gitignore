@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.env
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# Databases
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter / scripts output
+*.ipynb_checkpoints
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# macOS extended attributes
+.DS_Store
+**/.DS_Store
+
+# Temp / swap files
+*.swp
+*.swo
+*~
+
+# Generated / local-only files (not needed in GitHub)
+*.pptx
+HLD.md
+diagrams/generate_*.py
+
+# Test artifacts
+test_e2e.js
+test_scroll_ui.js
+playwright-report/
+frontend/test-results/
+
+# uv lock (optional — remove this line if you want reproducible installs)
+# uv.lock

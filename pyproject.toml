@@ -1,0 +1,10 @@
+# Root-level pyproject.toml — uv workspace definition.
+#
+# This lets you run `uv sync` from hcp-crm/ and have uv resolve
+# all Python dependencies declared in backend/pyproject.toml.
+#
+# Frontend (React/Node) uses npm — there is no TOML equivalent
+# for Node.js; package.json in frontend/ is the authoritative source.
+
+[tool.uv.workspace]
+members = ["backend"]
