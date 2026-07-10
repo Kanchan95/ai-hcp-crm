@@ -1,10 +1,10 @@
 # AI-First HCP CRM — Log Interaction Screen
 
-> Pharma field reps describe a doctor visit in plain English via chat. A LangGraph ReAct agent extracts structured CRM data, checks pharma compliance, suggests follow-ups, and recommends clinical materials — all automatically.
+> Pharma field representatives describe a doctor visit in plain English via chat. A LangGraph ReAct agent extracts structured CRM data, checks pharma compliance, suggests follow-ups, and recommends clinical materials — all automatically.
 
 **The form is never filled manually. The only way to populate it is through the AI chat.**
 
-> **Note on LLM model:** The assignment specifies `gemma2-9b-it` via Groq. This model was **decommissioned by Groq in July 2026** and is no longer available. The implementation uses `llama-3.1-8b-instant` as a drop-in replacement (same provider, same tool-calling support). To switch models, change `AGENT_MODEL` in `backend/.env`.
+> **Note on LLM model:** The assignment specifies `gemma2-9b-it` via Groq. This model was **decommissioned by Groq in July 2026** and is no longer available. The implementation uses `llama-3.3-70b-instant` as a drop-in replacement (same provider, same tool-calling support). To switch models, change `AGENT_MODEL` in `backend/.env`.
 
 ---
 
