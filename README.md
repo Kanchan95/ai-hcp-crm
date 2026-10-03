@@ -1,10 +1,8 @@
 # AI-First HCP CRM — Log Interaction Screen
 
-> Pharma field representatives describe a doctor visit in plain English via chat. A LangGraph ReAct agent extracts structured CRM data, checks pharma compliance, suggests follow-ups, and recommends clinical materials — all automatically.
+> Pharma field representatives describe a doctor visit in plain English via chat. A LangGraph ReAct agent extracts structured CRM data, generates an LLM compliance checklist, suggests follow-ups, and recommends clinical materials — all automatically.
 
 **The form is never filled manually. The only way to populate it is through the AI chat.**
-
-> **Note on LLM model:** The assignment specifies `gemma2-9b-it` via Groq. This model was **decommissioned by Groq in July 2026** and is no longer available. The implementation uses `llama-3.3-70b-instant` as a drop-in replacement (same provider, same tool-calling support). To switch models, change `AGENT_MODEL` in `backend/.env`.
 
 ---
 
@@ -28,7 +26,7 @@
 
 ---
 
-### Tool 4 — Compliance check against PhRMA / PDMA / Sunshine Act
+### Tool 4 — LLM-generated compliance checklist (PhRMA / PDMA / Sunshine Act prompts)
 
 ![Compliance check](screenshots/04_compliance.png)
 
@@ -97,7 +95,7 @@ sequenceDiagram
 | State | Redux Toolkit | `interactionSlice` (form) + `chatSlice` (chat + thunk) |
 | Backend | FastAPI 0.139 | Dependency injection, auto DB table creation on startup |
 | AI Orchestration | LangGraph 1.2.8 | ReAct loop — agent node ↔ tools node |
-| LLM | Groq — llama-3.1-8b-instant | Fast inference, tool-calling support |
+| LLM | Groq — `llama-3.3-70b-versatile` (default) | Set via `AGENT_MODEL`; used for both the agent and the extraction calls |
 | Database | PostgreSQL + SQLAlchemy 2 | JSONB columns for list fields |
 | Package Manager | uv | Reproducible lockfile, 10× faster than pip |
 | Containerisation | Docker + Docker Compose | One-command setup — postgres + backend + frontend |
@@ -112,7 +110,7 @@ sequenceDiagram
 | 1 | `log_interaction` | Extracts all 14 form fields from the chat entry → INSERT to DB | *"Today I met Dr. Ayesha Khan at Fortis…"* |
 | 2 | `edit_interaction` | Differential update — changes only the mentioned fields, keeps everything else | *"Actually the interaction type was a conference"* |
 | 3 | `suggest_follow_ups` | Generates 4–5 HCP-specific, time-bound follow-up actions | *"Suggest follow-ups for this visit"* |
-| 4 | `check_compliance` | Audits against PhRMA Code, PDMA sample rules, Sunshine Act | *"Check compliance for this interaction"* |
+| 4 | `check_compliance` | LLM-generated compliance checklist prompted with PhRMA Code, PDMA sample rules and Sunshine Act topics. Not a regulatory audit and not grounded in source documents | *"Check compliance for this interaction"* |
 | 5 | `recommend_materials` | Suggests clinical materials for the next visit; skips what was already shared | *"What materials should I bring for the next visit?"* |
 
 The AI also enforces **scope** — any question outside HCP interaction management is politely redirected. Greetings (hi / hello) get a single welcome line asking the rep to describe their visit.
@@ -184,6 +182,8 @@ docker compose up --build
 
 Open **http://localhost:3000**
 
+> Note: `docker-compose.yml` and the root `.env.example` currently default `AGENT_MODEL` to `llama-3.1-8b-instant`, while the code and `backend/.env.example` default to `llama-3.3-70b-versatile`. Set `AGENT_MODEL` in `.env` to choose explicitly.
+
 ---
 
 ## Run Locally (without Docker)
@@ -232,7 +232,7 @@ Open **http://localhost:3000**
 ```env
 GROQ_API_KEY=gsk_...
 DATABASE_URL=postgresql://postgres:password@localhost:5432/hcp_crm
-AGENT_MODEL=llama-3.1-8b-instant
+AGENT_MODEL=llama-3.3-70b-versatile
 ```
 
 ---
