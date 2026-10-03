@@ -4,8 +4,6 @@
 
 **The form is never filled manually. The only way to populate it is through the AI chat.**
 
-> **Note on LLM model:** The assignment specifies `gemma2-9b-it` via Groq. This model was **decommissioned by Groq in July 2026** and is no longer available. The implementation uses `llama-3.3-70b-instant` as a drop-in replacement (same provider, same tool-calling support). To switch models, change `AGENT_MODEL` in `backend/.env`.
-
 ---
 
 ## Live Demo Screenshots
